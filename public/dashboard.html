@@ -25,6 +25,19 @@
 <p id="humTime"></p>
 </div>
 </div>
+<div class="grid grid-cols-2 gap-4 mt-5">
+
+  <div class="bg-white p-5 rounded">
+    <h2>Predicted Temperature</h2>
+    <p id="predTemp" class="text-4xl text-blue-600"></p>
+  </div>
+
+  <div class="bg-white p-5 rounded">
+    <h2>Predicted Humidity</h2>
+    <p id="predHum" class="text-4xl text-green-600"></p>
+  </div>
+
+</div>
 
 <div class="bg-white p-5 mt-5 rounded">
 <h2>Send LCD Message</h2>
@@ -77,6 +90,21 @@ fetch('/records')
  </tr>`;
  });
  document.getElementById("tableData").innerHTML=output;
+});
+
+app.get("/prediction", async (req, res) => {
+  try {
+    const response = await axios.get(
+      "https://82b8-34-7-190-154.ngrok-free.app/predict"
+    );
+
+    res.json(response.data);
+
+  } catch (error) {
+    res.json({
+      error: "Prediction API Failed"
+    });
+  }
 });
 
 function saveText(){

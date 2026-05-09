@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo \"No build step required for this Express static app. Use npm start to run in production.\""
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "body-parser": "^1.20.2"
+    "axios": "^1.16.0",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2"
   }
 }

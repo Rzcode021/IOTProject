@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require("axios");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 
@@ -33,7 +34,7 @@ app.post("/register", (req, res) => {
     JSON.stringify(users, null, 2)
   );
 
-  res.redirect("/");
+  res.redirect("/?registered=1");
 });
 
 // Login
@@ -47,9 +48,9 @@ app.post("/login", (req, res) => {
   );
 
   if (user) {
-    res.redirect(`/dashboard.html?name=${user.name}`);
+    res.redirect(`/dashboard.html?name=${encodeURIComponent(user.name)}`);
   } else {
-    res.send("Invalid Login");
+    res.redirect("/?error=1");
   }
 });
 
@@ -97,6 +98,21 @@ app.get("/latest", (req, res) => {
   res.json(records[records.length - 1] || {});
 });
 
+app.get("/prediction", async (req, res) => {
+  try {
+    const response = await axios.get(
+      "https://82b8-34-7-190-154.ngrok-free.app/predict"
+    );
+
+    res.json(response.data);
+
+  } catch (error) {
+    res.json({
+      error: "Prediction API Failed"
+    });
+  }
+});
+
 // Save LCD text
 app.post("/save-text", (req, res) => {
   fs.writeFileSync("./data/lcd.txt", req.body.message);
@@ -108,6 +124,8 @@ app.get("/get-lcd-text", (req, res) => {
   let text = fs.readFileSync("./data/lcd.txt", "utf8");
   res.send(text);
 });
+
+
 
 // Delete record
 app.get("/delete/:id", (req, res) => {
