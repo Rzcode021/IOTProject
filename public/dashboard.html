@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<nav class="bg-blue-600 text-white p-4 flex justify-between">
+<h1>SISTec IoT Application 2026</h1>
+<span id="username"></span>
+</nav>
+
+<div class="p-6">
+
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-5 rounded">
+<h2>Latest Temperature</h2>
+<p id="temp" class="text-4xl"></p>
+<p id="tempTime"></p>
+</div>
+
+<div class="bg-white p-5 rounded">
+<h2>Latest Humidity</h2>
+<p id="hum" class="text-4xl"></p>
+<p id="humTime"></p>
+</div>
+</div>
+
+<div class="bg-white p-5 mt-5 rounded">
+<h2>Send LCD Message</h2>
+<input maxlength="16" id="msg" class="border p-2">
+<button onclick="saveText()" class="bg-blue-500 text-white px-4 py-2">Submit</button>
+</div>
+
+<div class="bg-white p-5 mt-5 rounded">
+<h2>Sensor Records</h2>
+<table class="w-full border">
+<thead>
+<tr>
+<th>#</th>
+<th>Temp</th>
+<th>Humidity</th>
+<th>Time</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody id="tableData"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+let params = new URLSearchParams(window.location.search);
+document.getElementById("username").innerText=params.get("name");
+
+fetch('/latest')
+.then(res=>res.json())
+.then(data=>{
+ document.getElementById('temp').innerText=data.temp+" °C";
+ document.getElementById('hum').innerText=data.hum+" %";
+ document.getElementById('tempTime').innerText=data.time+" | "+data.date;
+ document.getElementById('humTime').innerText=data.time+" | "+data.date;
+});
+
+fetch('/records')
+.then(res=>res.json())
+.then(data=>{
+ let output="";
+ data.forEach((r,i)=>{
+ output += `<tr>
+ <td>${i+1}</td>
+ <td>${r.temp}</td>
+ <td>${r.hum}</td>
+ <td>${r.time}</td>
+ <td>${r.date}</td>
+ </tr>`;
+ });
+ document.getElementById("tableData").innerHTML=output;
+});
+
+function saveText(){
+ let msg=document.getElementById("msg").value;
+ fetch('/save-text',{
+ method:'POST',
+ headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({message:msg})
+ }).then(()=>alert("Saved"))
+}
+</script>
+
+</body>
+</html>
