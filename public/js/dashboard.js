@@ -48,11 +48,33 @@ function loadPrediction() {
   fetch("/prediction")
     .then(res => res.json())
     .then(data => {
-      const temp = data.temp || data.temperature || data.predTemp || "N/A";
-      const hum = data.hum || data.humidity || data.predHum || "N/A";
-      document.getElementById("predTemp").textContent = temp === "N/A" ? temp : `${temp} °C`;
-      document.getElementById("predHum").textContent = hum === "N/A" ? hum : `${hum} %`;
-      document.getElementById("predictionStatus").textContent = data.error ? "Prediction service unavailable" : "Prediction loaded";
+      let temp = "N/A";
+      let hum = "N/A";
+
+      if (data) {
+        if (data.predicted_temperature !== undefined) {
+          temp = Array.isArray(data.predicted_temperature)
+            ? data.predicted_temperature[0]
+            : data.predicted_temperature;
+        } else if (data.temp !== undefined) {
+          temp = data.temp;
+        }
+
+        if (data.predicted_humidity !== undefined) {
+          hum = Array.isArray(data.predicted_humidity)
+            ? data.predicted_humidity[0]
+            : data.predicted_humidity;
+        } else if (data.hum !== undefined) {
+          hum = data.hum;
+        }
+      }
+
+      document.getElementById("predTemp").textContent =
+        temp === "N/A" ? temp : `${Number(temp).toFixed(2)} °C`;
+      document.getElementById("predHum").textContent =
+        hum === "N/A" ? hum : `${Number(hum).toFixed(2)} %`;
+      document.getElementById("predictionStatus").textContent =
+        data && data.error ? "Prediction service unavailable" : "Prediction loaded";
     })
     .catch(() => {
       document.getElementById("predTemp").textContent = "N/A";
