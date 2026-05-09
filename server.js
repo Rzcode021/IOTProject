@@ -1,12 +1,11 @@
 const express = require("express");
 const axios = require("axios");
 const fs = require("fs");
-const bodyParser = require("body-parser");
 
 const app = express();
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 function getIndianTime() {
@@ -54,16 +53,22 @@ app.post("/login", (req, res) => {
   }
 });
 
-// Save sensor data
-app.get("/save-sensor", (req, res) => {
-  let temp = req.query.temp;
-  let hum = req.query.hum;
+// Save sensor data (supports GET query and POST JSON)
+app.all("/save-sensor", (req, res) => {
+  const temp = req.method === "GET" ? req.query.temp : req.body.temp;
+  const hum = req.method === "GET" ? req.query.hum : req.body.hum;
 
-  let records = JSON.parse(
+  console.log("save-sensor", req.method, { temp, hum });
+
+  if (temp === undefined || hum === undefined) {
+    return res.status(400).json({ error: "Missing temp or hum" });
+  }
+
+  const records = JSON.parse(
     fs.readFileSync("./data/sensorData.json")
   );
 
-  let dt = getIndianTime();
+  const dt = getIndianTime();
 
   records.push({
     temp,
@@ -77,7 +82,7 @@ app.get("/save-sensor", (req, res) => {
     JSON.stringify(records, null, 2)
   );
 
-  res.send("Data Saved");
+  res.json({ message: "Data saved", temp, hum });
 });
 
 // Get all records
